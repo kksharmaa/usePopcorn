@@ -213,8 +213,8 @@ const App = () => {
         setIsLoading(true)
         const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`);
 
-        if (res.ok)
-          throw new Error("Something went wrong with fetching movies datas")
+        if (!res.ok)
+          throw new Error("No movies found")
         const data = await res.json();
         setMovies(data.Search);
         setIsLoading(false)
