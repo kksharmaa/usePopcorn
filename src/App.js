@@ -205,14 +205,24 @@ const App = () => {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchMovies = async () => {
-      setIsLoading(true)
-      const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`);
-      const data = await res.json();
-      setMovies(data.Search);
-      setIsLoading(false)
+      try {
+        setIsLoading(true)
+        const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`);
+
+        if (res.ok)
+          throw new Error("Something went wrong with fetching movies datas")
+        const data = await res.json();
+        setMovies(data.Search);
+        setIsLoading(false)
+      } catch (err) {
+        console.error(err.message);
+        setError(err.message);
+      }
+
     }
     fetchMovies();
   }, []);
@@ -230,7 +240,9 @@ const App = () => {
 
       <Main>
         <Box movies={movies}>
-          {isLoading ? <Loading /> : <MoviesList movies={movies} />}
+          {!isLoading && <Loading />}
+          {!isLoading && !error && <MoviesList movies={movies} />}
+          {error && <ErrroMessage message={error} />}
         </Box>
 
         <Box>
@@ -244,6 +256,14 @@ const App = () => {
 
 const Loading = () => {
   return (<p className="loader">Loading...</p>)
+}
+
+const ErrroMessage = ({ message }) => {
+  return (
+    <p className="error">
+      <span>❌</span>{message}
+    </p>
+  )
 }
 
 const Main = ({ children }) => {
